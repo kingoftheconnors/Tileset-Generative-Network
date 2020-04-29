@@ -31,18 +31,17 @@ def loadData(path):
 
 (x_train, y_train) = loadData("tilesets")
 
-model = load_model('tilesetmakerExpandedData.h5') # fewer layers
-model2 = load_model('tilesetmakerExpandedData2.h5') # extra layers
-model2 = load_model('tilesetmakerExpandedData-SMALL.h5') # extra layers
+model = load_model('tilesetmaker-to1.h5') # fewer layers
+model1 = load_model('tilesetmaker-to2.h5') # fewer layers
 
 for i in range(10):
     imgInd = random.randint(0, len(x_train)-1)
-    _, axs = plt.subplots(3, 2)
+    _, axs = plt.subplots(5, 2)
     axs[0, 0].imshow(x_train[imgInd])#, cmap='gray')
     axs[1, 0].imshow(y_train[imgInd])#, cmap='gray')
     img_rgb = np.expand_dims(x_train[imgInd], axis=0)  # expand dimension
-    img_rgb1 = model.predict(img_rgb)
-    img_rgb2 = model2.predict(img_rgb)
-    axs[0, 1].imshow(img_rgb1[0])#, cmap='gray')
-    axs[1, 1].imshow(img_rgb2[0])#, cmap='gray')
+    img_rgb0 = model.predict(img_rgb)
+    img_rgb1 = model1.predict(img_rgb)
+    axs[0, 1].imshow(img_rgb0[0])#, cmap='gray')
+    axs[1, 1].imshow(img_rgb1[0])#, cmap='gray')
     plt.show()

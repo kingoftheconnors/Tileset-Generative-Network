@@ -96,19 +96,9 @@ G = Conv2D(512, (3, 3), strides=2, padding='same')(F)
 G = BatchNormalization(momentum=0.8)(G)
 G = LeakyReLU(alpha=0.2)(G)
 
-# H: 2 -> 1
-H = Conv2D(1024, (3, 3), strides=2, padding='same')(G)
-H = BatchNormalization(momentum=0.8)(H)
-H = LeakyReLU(alpha=0.2)(H)
-
-# 1 -> 2
-upscale = Conv2DTranspose(1024, (3, 3), strides=2, padding='same')(H)
-upscale = BatchNormalization(momentum=0.8)(upscale)
-upscale = LeakyReLU(alpha=0.2)(upscale)
-
 # 2 -> 4
-upG = concatenate([upscale, G])
-upG = Conv2DTranspose(1024, (3, 3), strides=2, padding='same')(upG)
+#upG = concatenate([upscale, G])
+upG = Conv2DTranspose(1024, (3, 3), strides=2, padding='same')(G)
 upG = BatchNormalization(momentum=0.8)(upG)
 upG = LeakyReLU(alpha=0.2)(upG)
 
@@ -135,7 +125,7 @@ model.summary()
 opt = Adam(beta_1=0.5)
 model.compile(optimizer='adam', loss='binary_crossentropy') #0.5 beta instead of 0.9?
 # fits the model on batches with real-time data augmentation:
-model.fit(x_train, y_train, batch_size = 16, epochs=500) #32
+model.fit(x_train, y_train, batch_size = 8, epochs=500) #32
 
 for i in range(10):
     imgInd = random.randint(0, len(x_train)-1)
@@ -147,7 +137,7 @@ for i in range(10):
     plt.show()
 
 
-model.save('tilesetmaker-batch16.h5')
+model.save('tilesetmaker-batch8filters.h5')
 
 # Tests:
 # fewer filters

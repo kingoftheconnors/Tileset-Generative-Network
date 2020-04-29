@@ -92,18 +92,24 @@ F = BatchNormalization(momentum=0.8)(F)
 F = LeakyReLU(alpha=0.2)(F)
 
 # F: 4 -> 2
-F = Conv2D(512, (3, 3), strides=2, padding='same')(E)
-F = BatchNormalization(momentum=0.8)(F)
-F = LeakyReLU(alpha=0.2)(F)
+G = Conv2D(1024, (3, 3), strides=2, padding='same')(F)
+G = BatchNormalization(momentum=0.8)(G)
+G = LeakyReLU(alpha=0.2)(G)
 
-# 4 -> 8
-upscale = Conv2DTranspose(1024, (3, 3), strides=2, padding='same')(F)
+# 2 -> 4
+upscale = Conv2DTranspose(1024, (3, 3), strides=2, padding='same')(G)
 upscale = BatchNormalization(momentum=0.8)(upscale)
 upscale = LeakyReLU(alpha=0.2)(upscale)
 
+# 4 -> 8
+upE = concatenate([upscale, F])
+upF = Conv2DTranspose(512, (3, 3), strides=2, padding='same')(upscale)
+upF = BatchNormalization(momentum=0.8)(upF)
+upF = LeakyReLU(alpha=0.2)(upF)
+
 # E: 8 -> 16
-upE = concatenate([upscale, E])
-upE = Conv2DTranspose(1024, (3, 3), strides=2, padding='same')(upE)
+upE = concatenate([upF, E])
+upE = Conv2DTranspose(256, (3, 3), strides=2, padding='same')(upE)
 upE = BatchNormalization(momentum=0.8)(upE)
 upE = Activation('relu')(upE)
 
@@ -130,4 +136,4 @@ for i in range(10):
     plt.show()
 
 
-model.save('tilesetmaker-to4.h5')
+model.save('tilesetmaker-to2.h5')

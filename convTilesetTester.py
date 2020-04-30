@@ -31,8 +31,8 @@ def loadData(path):
 
 (x_train, y_train) = loadData("tilesets")
 
-model1 = load_model('tilesetmaker-batch8.h5') # fewer layers
-model2 = load_model('tilesetmaker-batch8filters.h5') # extra layers
+model1 = load_model('tilesetmaker.h5') # fewer layers
+model2 = load_model('tilesetmaker-SuperEpoch.h5') # extra layers
 
 for i in range(10):
     imgInd = random.randint(0, len(x_train)-1)

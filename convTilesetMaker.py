@@ -65,59 +65,69 @@ input_img = Input(shape=(256, 256, 3))
 A = Conv2D(128, (3, 3), strides=2, padding='same')(input_img)
 A = BatchNormalization(momentum=0.8)(A)
 A = LeakyReLU(alpha=0.2)(A)
+A = Dropout(0.5)(A)
 
 # B: 128 -> 64
 B = Conv2D(256, (3, 3), strides=2, padding='same')(A)
 B = BatchNormalization(momentum=0.8)(B)
 B = LeakyReLU(alpha=0.2)(B)
+B = Dropout(0.5)(B)
 
 # C: 64 -> 32
 C = Conv2D(256, (3, 3), strides=2, padding='same')(B)
 C = BatchNormalization(momentum=0.8)(C)
 C = LeakyReLU(alpha=0.2)(C)
+C = Dropout(0.5)(C)
 
 # D: 32 -> 16
 D = Conv2D(512, (3, 3), strides=2, padding='same')(C)
 D = BatchNormalization(momentum=0.8)(D)
 D = LeakyReLU(alpha=0.2)(D)
+D = Dropout(0.5)(D)
 
 # E: 16 -> 8
 E = Conv2D(512, (3, 3), strides=2, padding='same')(D)
 E = BatchNormalization(momentum=0.8)(E)
 E = LeakyReLU(alpha=0.2)(E)
+E = Dropout(0.5)(E)
 
 # F: 8 -> 4
 F = Conv2D(512, (3, 3), strides=2, padding='same')(E)
 F = BatchNormalization(momentum=0.8)(F)
 F = LeakyReLU(alpha=0.2)(F)
+F = Dropout(0.5)(F)
 
 # G: 4 -> 2
 G = Conv2D(512, (3, 3), strides=2, padding='same')(F)
 G = BatchNormalization(momentum=0.8)(G)
 G = LeakyReLU(alpha=0.2)(G)
+G = Dropout(0.5)(G)
 
 # 2 -> 4
 #upG = concatenate([upscale, G])
 upG = Conv2DTranspose(1024, (3, 3), strides=2, padding='same')(G)
 upG = BatchNormalization(momentum=0.8)(upG)
 upG = LeakyReLU(alpha=0.2)(upG)
+upG = Dropout(0.5)(upG)
 
 # 4 -> 8
 upF = concatenate([upG, F])
 upF = Conv2DTranspose(512, (3, 3), strides=2, padding='same')(upF)
 upF = BatchNormalization(momentum=0.8)(upF)
 upF = LeakyReLU(alpha=0.2)(upF)
+upF = Dropout(0.5)(upF)
 
 # E: 8 -> 16
 upE = concatenate([upF, E])
 upE = Conv2DTranspose(256, (3, 3), strides=2, padding='same')(upE)
 upE = BatchNormalization(momentum=0.8)(upE)
 upE = Activation('relu')(upE)
+upE = Dropout(0.5)(upE)
 
 # C: 16 -> 48
 upD = concatenate([upE, D])
 upD = Conv2DTranspose(3, (3, 3), strides=3, padding='same')(upD)
-upD = Activation('relu')(upD)
+upD = Activation('sigmoid')(upD)
 
 model = Model(input_img, upD)
 model.summary()
@@ -137,10 +147,7 @@ for i in range(10):
     plt.show()
 
 
-model.save('tilesetmaker-batch8filters.h5')
+model.save('tilesetmaker5.h5')
 
 # Tests:
-# fewer filters
-# Batch Size
-# Epoch Size
 # GAN?

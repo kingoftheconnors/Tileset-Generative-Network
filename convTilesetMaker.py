@@ -11,11 +11,12 @@ from tensorflow.keras.optimizers import Adam
 from PIL import Image, ImageOps
 from pathlib import Path
 import matplotlib.pyplot as plt
+import random
 
-random = np.random.default_rng()
+randomGen = np.random.default_rng()
 
 p = {
-    'batch_size': [8],
+    'lambda': [0.0001, 0.00001, 0.00001],
 }
 
 # Import images
@@ -29,7 +30,7 @@ def loadData(path, variate=True):
     indices = [i for i in range(size)]
     for i in subdirs:
         print(i)
-        index = random.choice(indices, replace=False)
+        index = randomGen.choice(indices, replace=False)
         indices.remove(index)
         imagex = Image.open(i + '\\x.png').convert('RGB')
         data = np.asarray(imagex)
@@ -39,35 +40,35 @@ def loadData(path, variate=True):
         y[index] = data/255
 
         if variate:
-            index = random.choice(indices, replace=False)
+            index = randomGen.choice(indices, replace=False)
             indices.remove(index)
             data = np.asarray(ImageOps.flip(imagex))
             x[index] = data/255
             data = np.asarray(ImageOps.flip(imagey))
             y[index] = data/255
             
-            index = random.choice(indices, replace=False)
+            index = randomGen.choice(indices, replace=False)
             indices.remove(index)
             data = np.asarray(ImageOps.mirror(imagex))
             x[index] = data/255
             data = np.asarray(ImageOps.mirror(imagey))
             y[index] = data/255
             
-            index = random.choice(indices, replace=False)
+            index = randomGen.choice(indices, replace=False)
             indices.remove(index)
             data = np.asarray(ImageOps.flip(ImageOps.mirror(imagex)))
             x[index] = data/255
             data = np.asarray(ImageOps.flip(ImageOps.mirror(imagey)))
             y[index] = data/255
             
-            index = random.choice(indices, replace=False)
+            index = randomGen.choice(indices, replace=False)
             indices.remove(index)
             data = np.asarray(ImageOps.flip(imagex.rotate(90)))
             x[index] = data/255
             data = np.asarray(ImageOps.flip(imagey.rotate(90)))
             y[index] = data/255
             
-            index = random.choice(indices, replace=False)
+            index = randomGen.choice(indices, replace=False)
             indices.remove(index)
             data = np.asarray(ImageOps.flip(imagex.rotate(-90)))
             x[index] = data/255
@@ -76,8 +77,8 @@ def loadData(path, variate=True):
     
     return x,y
 
-#(x_train, y_train) = loadData("tilesets")
-(x_train, y_train) = loadData("combinedTilesets")
+(x_train, y_train) = loadData("tilesets")
+#(x_train, y_train) = loadData("combinedTilesets")
 (x_validation, y_validation) = loadData("validation_tilesets", variate=False)
 
 def my_model(x_train, y_train, x_val, y_val, params):
@@ -85,7 +86,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
 
     # A: 256 -> 128
     A = Conv2D(128, (3, 3), strides=2, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(input_img)
     A = LeakyReLU(alpha=0.2)(A)
     A = BatchNormalization(momentum=0.8)(A)
@@ -93,7 +94,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
 
     # B: 128 -> 64
     B = Conv2D(128*2, (3, 3), strides=2, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(A)
     B = LeakyReLU(alpha=0.2)(B)
     B = BatchNormalization(momentum=0.8)(B)
@@ -101,7 +102,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
 
     # C: 64 -> 32
     C = Conv2D(128*2, (3, 3), strides=2, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(B)
     C = LeakyReLU(alpha=0.2)(C)
     C = BatchNormalization(momentum=0.8)(C)
@@ -109,7 +110,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
 
     # D: 32 -> 16
     D = Conv2D(128*4, (3, 3), strides=2, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(C)
     D = LeakyReLU(alpha=0.2)(D)
     D = BatchNormalization(momentum=0.8)(D)
@@ -117,7 +118,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
 
     # E: 16 -> 8
     E = Conv2D(128*4, (3, 3), strides=2, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(D)
     E = LeakyReLU(alpha=0.2)(E)
     E = BatchNormalization(momentum=0.8)(E)
@@ -125,7 +126,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
 
     # F: 8 -> 4
     F = Conv2D(128*4, (3, 3), strides=2, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(E)
     F = LeakyReLU(alpha=0.2)(F)
     F = BatchNormalization(momentum=0.8)(F)
@@ -133,7 +134,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
 
     # G: 4 -> 2
     G = Conv2D(128*4, (3, 3), strides=2, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(F)
     G = LeakyReLU(alpha=0.2)(G)
     G = BatchNormalization(momentum=0.8)(G)
@@ -142,7 +143,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
     # 2 -> 4
     #upG = concatenate([upscale, G])
     upG = Conv2DTranspose(128*8, (3, 3), strides=2, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(G)
     upG = LeakyReLU(alpha=0.2)(upG)
     upG = BatchNormalization(momentum=0.8)(upG)
@@ -151,7 +152,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
     # 4 -> 8
     upF = concatenate([upG, F])
     upF = Conv2DTranspose(128*4, (3, 3), strides=2, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(upF)
     upF = BatchNormalization(momentum=0.8)(upF)
     upF = Activation('relu')(upF)
@@ -160,7 +161,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
     # E: 8 -> 16
     upE = concatenate([upF, E])
     upE = Conv2DTranspose(128*2, (3, 3), strides=2, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(upE)
     upE = BatchNormalization(momentum=0.8)(upE)
     upE = Activation('relu')(upE)
@@ -169,7 +170,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
     # C: 16 -> 48
     upD = concatenate([upE, D])
     upD = Conv2DTranspose(3, (3, 3), strides=3, padding='same',
-        #kernel_regularizer=l2(0.001), bias_regularizer=l2(0.001)
+        kernel_regularizer=l2(params['lambda']), bias_regularizer=l2(params['lambda'])
         )(upD)
     upD = Activation('sigmoid')(upD)
 
@@ -177,31 +178,40 @@ def my_model(x_train, y_train, x_val, y_val, params):
     model.summary()
 
     opt = Adam(beta_1=0.5)
-    model.compile(optimizer=opt, loss='binary_crossentropy')#, metrics=['accuracy'])
+    model.compile(optimizer=opt, loss='mse')#, metrics=['accuracy'])
     # fits the model on batches with real-time data augmentation:
     #es = EarlyStopping(monitor='val_loss', min_delta=0, patience=15, verbose=0, mode='auto')
     out = model.fit(x_train, y_train,
-                    #validation_data=(x_val, y_val),
+                    validation_data=(x_val, y_val),
                     batch_size = 8,
-                    epochs=200,
+                    epochs=100,
                     verbose = 1)#, callbacks=[es])
 
-    #  "Accuracy"
+    #  "Loss"
     plt.plot(out.history['loss'])
     plt.plot(out.history['val_loss'])
     plt.title('model loss')
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'validation'], loc='upper left')
-    plt.savefig("metrics/loss-%s.png" % "mse")
+    plt.savefig("metrics/loss-%s.png" % ("mse" + str(params['lambda'])))
     plt.clf()
 
-    model.save('tilesetmaker-' + "mse" + '.h5')
+    model.save('tilesetmaker-' + "mse" + str(params['lambda']) + '.h5')
+    
+    #_, axs = plt.subplots(10, 2)
+    #for i in range(10):
+    #    imgInd = random.randint(0, len(x_train)-1)
+    #    axs[i, 0].imshow(x_train[imgInd])#, cmap='gray')
+    #    img_rgb = np.expand_dims(x_train[imgInd], axis=0)  # expand dimension
+    #    img_rgb = model.predict(img_rgb)
+    #    axs[i, 1].imshow(img_rgb[0])#, cmap='gray')
+    #plt.show()
 
     return out, model
 
-#talos.Scan(x_train, y_train, p, my_model, x_val=x_validation, y_val=y_validation, experiment_name="talos_output")
-my_model(x_train, y_train, x_validation, y_validation, p)
+talos.Scan(x_train, y_train, p, my_model, x_val=x_validation, y_val=y_validation, experiment_name="talos_output")
+#my_model(x_train, y_train, x_validation, y_validation, p)
 
 # Improvements:
 # GAN?

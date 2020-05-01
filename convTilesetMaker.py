@@ -14,11 +14,6 @@ import matplotlib.pyplot as plt
 
 random = np.random.default_rng()
 
-#parser = argparse.ArgumentParser(description="Tileset Creator Model Maker")
-#parser.add_argument('--version', type=str, default='')
-#args = parser.parse_args()
-#version = "test"
-
 p = {
     'batch_size': [8],
 }
@@ -81,7 +76,8 @@ def loadData(path, variate=True):
     
     return x,y
 
-(x_train, y_train) = loadData("tilesets")
+#(x_train, y_train) = loadData("tilesets")
+(x_train, y_train) = loadData("combinedTilesets")
 (x_validation, y_validation) = loadData("validation_tilesets", variate=False)
 
 def my_model(x_train, y_train, x_val, y_val, params):
@@ -181,14 +177,14 @@ def my_model(x_train, y_train, x_val, y_val, params):
     model.summary()
 
     opt = Adam(beta_1=0.5)
-    model.compile(optimizer=opt, loss='binary_crossentropy')#, metrics=['accuracy']) #0.5 beta instead of 0.9?
+    model.compile(optimizer=opt, loss='binary_crossentropy')#, metrics=['accuracy'])
     # fits the model on batches with real-time data augmentation:
     #es = EarlyStopping(monitor='val_loss', min_delta=0, patience=15, verbose=0, mode='auto')
     out = model.fit(x_train, y_train,
-                    validation_data=(x_val, y_val),
+                    #validation_data=(x_val, y_val),
                     batch_size = 8,
-                    epochs=100,
-                    verbose = 1)#, callbacks=[es]) #32
+                    epochs=200,
+                    verbose = 1)#, callbacks=[es])
 
     #  "Accuracy"
     plt.plot(out.history['loss'])
@@ -204,19 +200,8 @@ def my_model(x_train, y_train, x_val, y_val, params):
 
     return out, model
 
-#for i in range(5):
-#    imgInd = random.randint(0, len(x_train)-1)
-#    _, axs = plt.subplots(1, 2)
-#    axs[0].imshow(x_train[imgInd])#, cmap='gray')
-#    img_rgb = np.expand_dims(x_train[imgInd], axis=0)  # expand dimension
-#    img_rgb = model.predict(img_rgb)
-#    axs[1].imshow(img_rgb[0])#, cmap='gray')
-#    plt.show()
-
 #talos.Scan(x_train, y_train, p, my_model, x_val=x_validation, y_val=y_validation, experiment_name="talos_output")
 my_model(x_train, y_train, x_validation, y_validation, p)
-#model.save('tilesetmaker-' + version + '.h5')
 
-# Tests:
-#
+# Improvements:
 # GAN?

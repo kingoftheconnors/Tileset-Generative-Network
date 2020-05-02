@@ -30,22 +30,36 @@ def loadData(path):
     return x,y
 
 (x_train, y_train) = loadData("tilesets")
+model1 = load_model('tilesetmaker-L20.0005.h5')
+model2 = load_model('tilesetmaker-L20.0001.h5')
+model3 = load_model('tilesetmaker-L21e-05.h5')
+model4 = load_model('tilesetmaker-L21e-06.h5')
 
-model1 = load_model('tilesetmaker.h5') # fewer layers
-model2 = load_model('tilesetmaker-SuperEpoch.h5') # extra layers
+#model5 = load_model('tilesetmaker-expanded0.0005.h5')
+#model6 = load_model('tilesetmaker-expanded0.0001.h5')
+#model7 = load_model('tilesetmaker-expanded5e-06.h5')
+#model8 = load_model('tilesetmaker-expanded.h5')
 
 for i in range(10):
     imgInd = random.randint(0, len(x_train)-1)
-    _, axs = plt.subplots(2, 4)
+    _, axs = plt.subplots(3, 4)
     axs[0, 1].imshow(x_train[imgInd])#, cmap='gray')
     axs[0, 2].imshow(y_train[imgInd])#, cmap='gray')
     img_rgb = np.expand_dims(x_train[imgInd], axis=0)  # expand dimension
     img_rgb1 = model1.predict(img_rgb)
     img_rgb2 = model2.predict(img_rgb)
-    #img_rgb3 = model3.predict(img_rgb)
-    #img_rgb4 = model4.predict(img_rgb)
+    img_rgb3 = model3.predict(img_rgb)
+    img_rgb4 = model4.predict(img_rgb)
     axs[1, 0].imshow(img_rgb1[0])#, cmap='gray')
     axs[1, 1].imshow(img_rgb2[0])#, cmap='gray')
-    #axs[1, 2].imshow(img_rgb3[0])#, cmap='gray')
-    #axs[1, 3].imshow(img_rgb4[0])#, cmap='gray')
+    axs[1, 2].imshow(img_rgb3[0])#, cmap='gray')
+    axs[1, 3].imshow(img_rgb4[0])#, cmap='gray')
+    #img_rgb1 = model5.predict(img_rgb)
+    #img_rgb2 = model6.predict(img_rgb)
+    #img_rgb3 = model7.predict(img_rgb)
+    #img_rgb4 = model8.predict(img_rgb)
+    #axs[2, 0].imshow(img_rgb1[0])#, cmap='gray')
+    #axs[2, 1].imshow(img_rgb2[0])#, cmap='gray')
+    #axs[2, 2].imshow(img_rgb3[0])#, cmap='gray')
+    #axs[2, 3].imshow(img_rgb4[0])#, cmap='gray')
     plt.show()

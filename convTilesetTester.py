@@ -30,14 +30,14 @@ def loadData(path):
     return x,y
 
 (x_train, y_train) = loadData("tilesets")
-#model1 = load_model('tilesetmaker-L20.0005.h5')
-model2 = load_model('tilesetmaker-L20.0001.h5')
-model3 = load_model('tilesetmaker-L21e-05.h5')
-model4 = load_model('tilesetmaker-L21e-06.h5')
+#model1 = load_model('tilesetmaker-before0.0005.h5')
+model2 = load_model('tilesetmaker-before0.0001.h5')
+model3 = load_model('tilesetmaker-before1e-05.h5')
+model4 = load_model('tilesetmaker-before1e-06.h5')
 
 model5 = load_model('tilesetmaker-noDropout0.0001.h5')
 model6 = load_model('tilesetmaker-noDropout1e-05.h5')
-model7 = load_model('tilesetmaker-noDropout5e-06.h5')
+#model7 = load_model('tilesetmaker-noDropout5e-06.h5')
 model8 = load_model('tilesetmaker-noDropout1e-06.h5')
 
 for i in range(10):
@@ -56,10 +56,10 @@ for i in range(10):
     axs[1, 3].imshow(img_rgb4[0])#, cmap='gray')
     img_rgb1 = model5.predict(img_rgb)
     img_rgb2 = model6.predict(img_rgb)
-    img_rgb3 = model7.predict(img_rgb)
+    #img_rgb3 = model7.predict(img_rgb)
     img_rgb4 = model8.predict(img_rgb)
     axs[2, 0].imshow(img_rgb1[0])#, cmap='gray')
     axs[2, 1].imshow(img_rgb2[0])#, cmap='gray')
-    axs[2, 2].imshow(img_rgb3[0])#, cmap='gray')
+    #axs[2, 2].imshow(img_rgb3[0])#, cmap='gray')
     axs[2, 3].imshow(img_rgb4[0])#, cmap='gray')
     plt.show()

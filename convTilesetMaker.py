@@ -16,7 +16,7 @@ import random
 randomGen = np.random.default_rng()
 
 p = {
-    'lambda': [0.0001, 0.00001, 0.000005, 0.000001],
+    'lambda': [0.00001, 0.000005, 0.000001],
 }
 
 # Import images
@@ -86,31 +86,36 @@ def my_model(x_train, y_train, x_val, y_val, params):
     filter_size = 256
 
     # A: 256 -> 128
-    A = Conv2D(filter_size, (3, 3), strides=2, padding='same')(input_img)
+    A = Conv2D(filter_size, (3, 3), strides=2, padding='same',
+        activity_regularizer=l2(params['lambda']))(input_img)
     A = LeakyReLU(alpha=0.2)(A)
     A = BatchNormalization(momentum=0.8)(A)
     A = Dropout(0.2)(A)
 
     # B: 128 -> 64
-    B = Conv2D(filter_size*2, (3, 3), strides=2, padding='same')(A)
+    B = Conv2D(filter_size*2, (3, 3), strides=2, padding='same',
+        activity_regularizer=l2(params['lambda']))(A)
     B = LeakyReLU(alpha=0.2)(B)
     B = BatchNormalization(momentum=0.8)(B)
     B = Dropout(0.2)(B)
 
     # C: 64 -> 32
-    C = Conv2D(filter_size*2, (3, 3), strides=2, padding='same')(B)
+    C = Conv2D(filter_size*2, (3, 3), strides=2, padding='same',
+        activity_regularizer=l2(params['lambda']))(B)
     C = LeakyReLU(alpha=0.2)(C)
     C = BatchNormalization(momentum=0.8)(C)
     #C = Dropout(0.2)(C) #
 
     # D: 32 -> 16
-    D = Conv2D(filter_size*4, (3, 3), strides=2, padding='same')(C)
+    D = Conv2D(filter_size*4, (3, 3), strides=2, padding='same',
+        activity_regularizer=l2(params['lambda']))(C)
     D = LeakyReLU(alpha=0.2)(D)
     D = BatchNormalization(momentum=0.8)(D)
     D = Dropout(0.2)(D)
 
     # E: 16 -> 8
-    E = Conv2D(filter_size*4, (3, 3), strides=2, padding='same')(D)
+    E = Conv2D(filter_size*4, (3, 3), strides=2, padding='same',
+        activity_regularizer=l2(params['lambda']))(D)
     E = LeakyReLU(alpha=0.2)(E)
     E = BatchNormalization(momentum=0.8)(E)
     E = Dropout(0.2)(E) #
@@ -147,14 +152,16 @@ def my_model(x_train, y_train, x_val, y_val, params):
 
     # E: 8 -> 16
     upE = concatenate([upF, E])
-    upE = Conv2DTranspose(filter_size*2, (3, 3), strides=2, padding='same')(upE)
+    upE = Conv2DTranspose(filter_size*2, (3, 3), strides=2, padding='same',
+        activity_regularizer=l2(params['lambda']))(upE)
     upE = BatchNormalization(momentum=0.8)(upE)
     upE = Activation('relu')(upE)
     #upE = Dropout(0.2)(upE) #
 
     # C: 16 -> 48
     upD = concatenate([upE, D])
-    upD = Conv2DTranspose(3, (3, 3), strides=3, padding='same')(upD)
+    upD = Conv2DTranspose(3, (3, 3), strides=3, padding='same',
+        activity_regularizer=l2(params['lambda']))(upD)
     upD = Activation('sigmoid')(upD)
 
     model = Model(input_img, upD)
@@ -170,7 +177,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
                     epochs=200,
                     verbose = 1)#, callbacks=[es])
 
-    model.save('tilesetmaker-' + "noDropout" + str(params['lambda']) + '.h5')
+    model.save('tilesetmaker-' + "after" + str(params['lambda']) + '.h5')
 
     #  "Loss"
     plt.plot(out.history['loss'])
@@ -198,11 +205,12 @@ talos.Scan(x_train, y_train, p, my_model, x_val=x_validation, y_val=y_validation
 #my_model(x_train, y_train, x_validation, y_validation, p)
 
 # Improvements: Test against L2 layer for if following techniques improve val-loss
-# Removed dropout in late layers vs no dropout
-# activity regularizers to ALL layers
+# decrease filter size to improve memory usage
+# decrease lambda further than 1e-06
 # ReduceLROnPlateau when val_loss plateaus to go from macro learning to fine-tuning what validation error plateaus
 # Use Teros on adam beta1 and beta2
 # have a new file of metrics that holds graphs for different filter_sizes and check which has most attuned loss/val-loss
 # adding another layer of conv2D and conv2DTranspose? if that doesn't work, removing?
+# Taking out lambda regularization from decoding? How about decoding?
 # GAN?
 # Moar data

@@ -16,7 +16,7 @@ import random
 randomGen = np.random.default_rng()
 
 p = {
-    'lambda': [0.00001, 0.000001],
+    'lambda': [0.0001, 0.00001, 0.000005, 0.000001],
 }
 
 # Import images
@@ -101,7 +101,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
     C = Conv2D(filter_size*2, (3, 3), strides=2, padding='same')(B)
     C = LeakyReLU(alpha=0.2)(C)
     C = BatchNormalization(momentum=0.8)(C)
-    C = Dropout(0.2)(C) #
+    #C = Dropout(0.2)(C) #
 
     # D: 32 -> 16
     D = Conv2D(filter_size*4, (3, 3), strides=2, padding='same')(C)
@@ -120,7 +120,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
         activity_regularizer=l2(params['lambda']))(E)
     F = LeakyReLU(alpha=0.2)(F)
     F = BatchNormalization(momentum=0.8)(F)
-    F = Dropout(0.2)(F)
+    #F = Dropout(0.2)(F)
 
     # G: 4 -> 2
     G = Conv2D(filter_size*4, (3, 3), strides=2, padding='same',
@@ -135,7 +135,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
         activity_regularizer=l2(params['lambda']))(G)
     upG = LeakyReLU(alpha=0.2)(upG)
     upG = BatchNormalization(momentum=0.8)(upG)
-    upG = Dropout(0.2)(upG) #
+    #upG = Dropout(0.2)(upG) #
 
     # 4 -> 8
     upF = concatenate([upG, F])
@@ -143,14 +143,14 @@ def my_model(x_train, y_train, x_val, y_val, params):
         activity_regularizer=l2(params['lambda']))(upF)
     upF = BatchNormalization(momentum=0.8)(upF)
     upF = Activation('relu')(upF)
-    upF = Dropout(0.2)(upF)
+    #upF = Dropout(0.2)(upF)
 
     # E: 8 -> 16
     upE = concatenate([upF, E])
     upE = Conv2DTranspose(filter_size*2, (3, 3), strides=2, padding='same')(upE)
     upE = BatchNormalization(momentum=0.8)(upE)
     upE = Activation('relu')(upE)
-    upE = Dropout(0.2)(upE) #
+    #upE = Dropout(0.2)(upE) #
 
     # C: 16 -> 48
     upD = concatenate([upE, D])
@@ -167,20 +167,20 @@ def my_model(x_train, y_train, x_val, y_val, params):
     out = model.fit(x_train, y_train,
                     validation_data=(x_val, y_val),
                     batch_size = 8,
-                    epochs=100,
+                    epochs=200,
                     verbose = 1)#, callbacks=[es])
 
-    model.save('tilesetmaker-' + "expanded" + str(params['lambda']) + '.h5')
+    model.save('tilesetmaker-' + "noDropout" + str(params['lambda']) + '.h5')
 
     #  "Loss"
     plt.plot(out.history['loss'])
     plt.plot(out.history['val_loss'])
     plt.title('model loss')
     plt.ylabel('loss')
-    plt.gca().set_ylim([0,2])
+    plt.gca().set_ylim([0,1])
     plt.xlabel('epoch')
     plt.legend(['train', 'validation'], loc='upper left')
-    plt.savefig("metrics/loss-%s.png" % ("expanded" + str(params['lambda'])))
+    plt.savefig("metrics/loss-after %s.png" % (str(params['lambda'])))
     plt.clf()
     
     #_, axs = plt.subplots(10, 2)

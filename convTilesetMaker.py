@@ -83,7 +83,7 @@ def loadData(path, variate=True):
 
 def my_model(x_train, y_train, x_val, y_val, params):
     input_img = Input(shape=(256, 256, 3))
-    filter_size = 256
+    filter_size = 128
 
     # A: 256 -> 128
     A = Conv2D(filter_size, (3, 3), strides=2, padding='same',
@@ -208,7 +208,7 @@ talos.Scan(x_train, y_train, p, my_model, x_val=x_validation, y_val=y_validation
 # decrease filter size to improve memory usage
 # decrease lambda further than 1e-06
 # ReduceLROnPlateau when val_loss plateaus to go from macro learning to fine-tuning what validation error plateaus
-# Use Teros on adam beta1 and beta2
+# Adam beta1 and beta2
 # have a new file of metrics that holds graphs for different filter_sizes and check which has most attuned loss/val-loss
 # adding another layer of conv2D and conv2DTranspose? if that doesn't work, removing?
 # Taking out lambda regularization from decoding? How about decoding?

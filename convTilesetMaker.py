@@ -3,10 +3,10 @@ import talos
 import numpy as np
 import tensorflow
 import tensorflow.keras.backend as K
-from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, UpSampling2D, Conv2DTranspose, Dropout, BatchNormalization, Activation, LeakyReLU, concatenate
+from tensorflow.keras.layers import Input, Conv2D, Conv2DTranspose, Dropout, BatchNormalization, Activation, LeakyReLU, concatenate
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.models import Model
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import ReduceLROnPlateau#, EarlyStopping
 from tensorflow.keras.optimizers import Adam
 from PIL import Image, ImageOps
 from pathlib import Path
@@ -171,11 +171,14 @@ def my_model(x_train, y_train, x_val, y_val, params):
     model.compile(optimizer=opt, loss='mse')#, metrics=['accuracy'])
     # fits the model on batches with real-time data augmentation:
     #es = EarlyStopping(monitor='val_loss', min_delta=0, patience=15, verbose=0, mode='auto')
+    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5,
+                              patience=25)
+
     out = model.fit(x_train, y_train,
                     validation_data=(x_val, y_val),
                     batch_size = 8,
                     epochs=200,
-                    verbose = 1)#, callbacks=[es])
+                    verbose = 1, callbacks=[reduce_lr])
 
     model.save('tilesetmaker-' + "after" + str(params['lambda']) + '.h5')
 
@@ -205,12 +208,13 @@ talos.Scan(x_train, y_train, p, my_model, x_val=x_validation, y_val=y_validation
 #my_model(x_train, y_train, x_validation, y_validation, p)
 
 # Improvements: Test against L2 layer for if following techniques improve val-loss
-# decrease filter size to improve memory usage
-# decrease lambda further than 1e-06
-# ReduceLROnPlateau when val_loss plateaus to go from macro learning to fine-tuning what validation error plateaus
+# Moar data
 # Adam beta1 and beta2
 # have a new file of metrics that holds graphs for different filter_sizes and check which has most attuned loss/val-loss
 # adding another layer of conv2D and conv2DTranspose? if that doesn't work, removing?
 # Taking out lambda regularization from decoding? How about decoding?
+# decrease lambda further than 1e-06
+# decreasing filter size MORE
 # GAN?
-# Moar data
+# ReduceLROnPlateau when val_loss plateaus to go from macro learning to fine-tuning what validation error plateaus
+#               (Less patience, lower plateau rate, etc?)

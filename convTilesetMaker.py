@@ -16,8 +16,7 @@ import random
 randomGen = np.random.default_rng()
 
 p = {
-    'beta1': [0.5, 0.7, 0.8],
-    'beta2': [0.8, 0.9, 0.95, 0.99],
+    'filter_size': [128],
 }
 
 # Import images
@@ -168,7 +167,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
     model = Model(input_img, upD)
     model.summary()
 
-    opt = Adam(beta_1=params['beta1'], beta_2=params['beta2'])
+    opt = Adam(beta_1=0.5, beta_2=0.95)
     model.compile(optimizer=opt, loss='mse')#, metrics=['accuracy'])
     # fits the model on batches with real-time data augmentation:
     #es = EarlyStopping(monitor='val_loss', min_delta=0, patience=15, verbose=0, mode='auto')
@@ -181,7 +180,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
                     epochs=200,
                     verbose = 1, callbacks=[reduce_lr])
 
-    model.save('tilesetmaker-' + "after" + str(params['beta1']) + " " + str(params['beta2']) + '.h5')
+    model.save('tilesetmaker-' + "after" + str(params['beta2']) + '.h5')
 
     #  "Loss"
     plt.plot(out.history['loss'])
@@ -191,7 +190,7 @@ def my_model(x_train, y_train, x_val, y_val, params):
     plt.gca().set_ylim([0,1])
     plt.xlabel('epoch')
     plt.legend(['train', 'validation'], loc='upper left')
-    plt.savefig("metrics/loss-after %s.png" % (str(params['beta1']*100) + " " + str(params['beta2']*100) ))
+    plt.savefig("metrics/loss-after %s.png" % (str(params['beta2']*100) ))
     plt.clf()
     
     #_, axs = plt.subplots(10, 2)
@@ -210,8 +209,6 @@ talos.Scan(x_train, y_train, p, my_model, x_val=x_validation, y_val=y_validation
 
 # Improvements: Test against L2 layer for if following techniques improve val-loss
 # Moar data
-# Adam beta1 and beta2
-# have a new file of metrics that holds graphs for different filter_sizes and check which has most attuned loss/val-loss
 # adding another layer of conv2D and conv2DTranspose? if that doesn't work, removing?
 # Taking out lambda regularization from decoding? How about decoding?
 # decrease lambda further than 1e-06
